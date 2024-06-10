@@ -6,7 +6,7 @@ services:
     container_name: awesome-zookeeper
     restart: unless-stopped
     ports:
-      - 2181:2181
+      - 127.0.0.1:2181:2181
     environment:
       JVMFLAGS: "-Xmx256M -Xms128M"
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -23,6 +23,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 120s
+    networks:
+      - awesome-network
   # ------------------------------------------------------------
   awesome-kafka:
     image: confluentinc/cp-enterprise-kafka:latest
@@ -32,7 +34,7 @@ services:
       awesome-zookeeper:
         condition: service_healthy
     ports:
-      - 9092:29092
+      - 127.0.0.1:9092:29092
     expose:
       - 9092
     environment:
@@ -56,12 +58,14 @@ services:
       timeout: 5s
       retries: 5
       start_period: 120s
+    networks:
+      - awesome-network
   # ------------------------------------------------------------
   awesome-kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: awesome-kafka-ui
     ports:
-      - 8080:8080
+      - 127.0.0.1:8080:8080
     depends_on:
       - awesome-zookeeper
       - awesome-kafka
@@ -70,6 +74,8 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: awesome-kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: awesome-zookeeper:2181
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schemaregistry:8085
+    networks:
+      - awesome-network
   # ------------------------------------------------------------
   awesome-postgres:
     image: postgres:10.2
@@ -81,23 +87,29 @@ services:
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: uwu
     ports:
-      - 5432:5432
+      - 127.0.0.1:5432:5432
     expose:
       - 5432
     volumes:
       - ./.volume/postgres:/data/postgres
+    networks:
+      - awesome-network
   # ------------------------------------------------------------
-#  awesome-app:
-#    build: .
-#    container_name: awesome-micronaut-app
-#    restart: unless-stopped
-#    environment:
-#      DB_HOST: 0.0.0.0
-#      DB_PORT: 5432
-#      DB_USER: postgres
-#      DB_PASS: 123
-#    ports:
-#      - 8081:8081
-#    depends_on:
-#      - awesome-postgres
-#      - awesome-kafka
+  awesome-app:
+    build: .
+    container_name: awesome-micronaut-app
+    restart: unless-stopped
+    environment:
+      DB_HOST: awesome-postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: 123
+    ports:
+      - 8081:8081
+    depends_on:
+      - awesome-postgres
+      - awesome-kafka
+    networks:
+      - awesome-network
+networks:
+  awesome-network:
