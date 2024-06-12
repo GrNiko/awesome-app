@@ -23,13 +23,13 @@ public class AwesomeController {
 
 
     @Get("/all")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public List<OutBoxMessage> getActualMessageList() {
             return requestService.allMessages();
     }
 
     @Get("/{id}")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public OutBoxMessage getMessageById(@PathVariable("id") Long id) {
         return requestService.messageById(id);
     }

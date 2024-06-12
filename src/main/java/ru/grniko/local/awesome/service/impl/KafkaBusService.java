@@ -31,7 +31,7 @@ public class KafkaBusService implements BusService {
 
     @Override
     public void handle() {
-        ConsumerRecords<String, String> messages = consumer.poll(Duration.ofMillis(5));
+        ConsumerRecords<String, String> messages = consumer.poll(Duration.ofMillis(500));
         List<OutBoxMessage> wrappedMessages = new ArrayList<>();
         messages.forEach(km -> wrappedMessages.add(new OutBoxMessage(km)));
         wrappedMessages.forEach(m-> m.setStatus("N"));

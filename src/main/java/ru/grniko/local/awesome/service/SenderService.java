@@ -1,5 +1,6 @@
 package ru.grniko.local.awesome.service;
 
+import io.micronaut.context.annotation.Context;
 import io.micronaut.scheduling.annotation.Scheduled;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -8,7 +9,8 @@ import ru.grniko.local.awesome.dto.OutBoxMessage;
 
 import java.util.List;
 
-@Singleton
+@Singleton//хрен тебе а не шедулер в синглтон скопе
+//@Context
 public class SenderService {
     private final MessageDao messageDao;
     private final BusService busService;
@@ -19,6 +21,10 @@ public class SenderService {
         this.busService = busService;
     }
 
+    @Scheduled(fixedRate = "10s")
+    public void checkIncomeMessage(){
+        busService.handle();
+    }
 
     @Scheduled(fixedRate = "10s")
     public void checkMessageForSend() {
